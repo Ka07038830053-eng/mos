@@ -1,0 +1,469 @@
+<!doctype html><html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c10"><link rel="manifest" href="manifest.webmanifest"><title>MONSTER DIVE IV</title>
+<style>
+:root{--bg:#0b0c10;--p:#15171d;--p2:#1e212a;--line:#30343f;--txt:#f5f5ef;--muted:#969aa8;--lime:#d9ff62;--red:#ff6675;--gold:#ffd66b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#303546,#0b0c10 48%);color:var(--txt);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}button{font:inherit;color:inherit;border:0;cursor:pointer}.app{max-width:540px;margin:auto;padding:15px 13px 35px}
+header{display:flex;justify-content:space-between;align-items:center}.logo{font-weight:950;letter-spacing:.13em}.sub{font-size:9px;color:var(--muted);letter-spacing:.16em}.currency{background:#171920;border:1px solid var(--line);padding:8px 11px;border-radius:12px;font-size:12px}
+.screen{display:none}.screen.active{display:block}.card{background:linear-gradient(145deg,#191b22,#121319);border:1px solid var(--line);border-radius:20px;padding:15px;margin:10px 0;box-shadow:0 12px 35px #0006}
+.hero{text-align:center}.floor{font-size:10px;color:var(--muted);letter-spacing:.15em}.tag{font-size:11px;color:var(--muted)}.monster{height:165px;display:flex;align-items:center;justify-content:center;position:relative}.monster .body{font-size:100px;filter:drop-shadow(0 13px 9px #0008)}.monster .acc{position:absolute;font-size:36px;transform:translate(45px,-48px)}.monster .mark{position:absolute;font-size:22px;transform:translate(-48px,-45px)}.name{font-size:23px;font-weight:900}.species{font-size:10px;color:var(--muted);letter-spacing:.08em}.bar{height:10px;background:#090a0d;border:1px solid #292c35;border-radius:99px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#9bdc46,#d9ff62);transition:.2s}.enemyfill{background:linear-gradient(90deg,#ff4f66,#ff9570)}.hpbox{margin:12px 7px}.hptext{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:5px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.stat{background:#101116;border:1px solid var(--line);border-radius:12px;text-align:center;padding:7px 3px}.stat b{display:block;font-size:15px}.stat small{color:var(--muted);font-size:8px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.btn{background:#252832;border:1px solid #383c48;border-radius:14px;padding:12px;font-weight:800}.btn.primary{background:var(--lime);color:#11150c;border-color:var(--lime)}.btn:disabled{opacity:.35}
+.section{font-size:10px;color:var(--muted);letter-spacing:.14em;margin:18px 2px 7px}.nodes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.node{background:#181a21;border:1px solid var(--line);border-radius:16px;padding:11px 7px;text-align:left;min-height:110px}.node .ico{font-size:25px}.node b{display:block;margin:6px 0 2px}.node small{font-size:9px;color:var(--muted)}
+.log{max-height:145px;overflow:auto;font-size:10px;color:#c9cbd3;line-height:1.55}.log div{padding:4px 0;border-bottom:1px solid #252832}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mon.selected{background:#252b20}.mon{background:#14161c;border:1px solid var(--line);border-radius:16px;padding:10px;text-align:center}.mon .mini{font-size:50px}.mon b{font-size:13px}.mon small{font-size:9px;color:var(--muted)}.locked{filter:grayscale(1);opacity:.35}
+.rarity{font-size:9px;font-weight:900;letter-spacing:.08em}.common{border-color:#555b67}.uncommon{border-color:#5ec99a}.rare{border-color:#66a5ff}.epic{border-color:#bd76ff}.legendary{border-color:#ffd45e}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;z-index:10}.modal.show{display:flex}.sheet{width:100%;max-width:540px;margin:auto;background:#171920;border:1px solid var(--line);border-radius:24px 24px 0 0;padding:17px;max-height:90vh;overflow:auto}.close{float:right;width:32px;height:32px;border-radius:50%;background:#2a2d36}.choicegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.choice{background:#232630;border:1px solid var(--line);border-radius:13px;padding:9px;text-align:center}.choice.selected{outline:2px solid var(--lime)}.choice span{display:block;font-size:25px}.choice small{font-size:8px;color:var(--muted)}
+.notice{background:#20231a;border:1px solid #4d572e;border-radius:13px;padding:10px;font-size:10px;color:#dce7b1}.boss{border-color:#70404a}.danger{color:#ff8994}.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style></head><body><div class="app">
+<header><div><div class="logo">MONSTER DIVE IV</div><div class="sub">COLLECT / EVOLVE / BUILD</div></div><div class="currency">✦ <span id="shards">0</span></div></header>
+
+<section id="home" class="screen active"><div class="card hero">
+<div class="floor">ACTIVE PARTNER</div><div id="homeVisual" class="monster"></div><div id="homeName" class="name"></div><div id="homeSpecies" class="species"></div>
+<div class="hpbox"><div class="bar"><div id="homeHp" class="fill" style="width:100%"></div></div><div class="hptext"><span id="homeHpText"></span><span id="homeXP"></span></div></div>
+<div id="homeStats" class="stats"></div><div class="actions"><button class="btn primary" onclick="startRun()">⚔ START DIVE</button><button class="btn" onclick="customize()">✦ CUSTOMIZE</button></div></div>
+<div class="section">BESTIARY</div><div class="card"><div id="preview" class="grid2"></div><button class="btn" style="width:100%;margin-top:8px" onclick="collection()">VIEW ALL MONSTERS</button></div>
+<div class="section">PERMANENT RELICS</div><div class="card" id="relics"></div></section>
+
+<section id="map" class="screen"><div class="card"><div class="floor" id="floorTitle"></div><h2 style="margin:4px 0">Choose your path</h2><div class="tag">The deeper you go, the stranger it gets.</div></div><div id="nodes" class="nodes"></div><div class="card"><div class="section" style="margin-top:0">RUN STATUS</div><div id="runStats" class="stats"></div></div><button class="btn" style="width:100%" onclick="relicModal()">✦ RUN RELICS</button></section>
+
+<section id="battle" class="screen"><div class="card"><div class="floor" id="battleTitle"></div><div id="enemyName" style="text-align:center;font-weight:900;font-size:18px"></div><div id="enemyVisual" class="monster" style="height:105px"></div><div class="hpbox"><div class="bar"><div id="enemyHP" class="fill enemyfill"></div></div><div class="hptext"><span id="enemyHPText"></span><span id="intent"></span></div></div>
+<div id="playerVisual" class="monster" style="height:100px"></div><div id="playerName" style="text-align:center;font-weight:900"></div><div class="hpbox"><div class="bar"><div id="playerHP" class="fill"></div></div><div class="hptext"><span id="playerHPText"></span><span id="battleXP"></span></div></div>
+<div class="actions"><button class="btn primary" onclick="attack()">⚔ ATTACK</button><button class="btn" onclick="skill()">✦ SKILL</button><button class="btn" id="captureBtn" onclick="capture()">◉ CAPTURE</button><button class="btn" onclick="escapeBattle()">↩ ESCAPE</button></div><div class="section">BATTLE LOG</div><div id="battleLog" class="log"></div></div></section>
+
+<section id="event" class="screen"><div class="card hero"><div id="eventIcon" style="font-size:55px"></div><h2 id="eventTitle"></h2><p id="eventText" class="tag" style="line-height:1.8"></p><div id="eventBtns" class="actions"></div></div></section>
+<section id="boss" class="screen"><div class="card hero boss"><div class="floor">FLOOR BOSS</div><div id="bossVisual" class="monster"></div><div id="bossName" class="name"></div><p class="tag">A boss relic awaits.</p><button class="btn primary" style="width:100%" onclick="startBoss()">⚔ BOSS BATTLE</button></div></section>
+<div id="modal" class="modal"><div id="sheet" class="sheet"></div></div>
+</div>
+
+<script>
+const M={
+slime:{species:"SLIME",base:"🟢",name:"Mochi",hp:48,atk:9,def:3,skill:"Split Shot",evo:[["Aqua Mochi","🫧",{hp:16,atk:4,def:1}],["King Mochi","👑",{hp:30,atk:7,def:3}]]},
+fox:{species:"FOX",base:"🦊",name:"Kits",hp:42,atk:11,def:2,skill:"Flame Bite",evo:[["Ember Kits","🔥",{hp:12,atk:7,def:1}],["Nox Kits","🌙",{hp:24,atk:9,def:2}]]},
+bat:{species:"BAT",base:"🦇",name:"Bibi",hp:38,atk:12,def:2,skill:"Sonic",evo:[["Voltwing","⚡",{hp:15,atk:6,def:2}],["Nightwing","🪽",{hp:22,atk:10,def:2}]]},
+plant:{species:"PLANT",base:"🌱",name:"Moss",hp:55,atk:7,def:5,skill:"Vine Heal",evo:[["Bloom","🌸",{hp:20,atk:4,def:3}],["Ancient Bloom","🌳",{hp:35,atk:7,def:5}]]},
+golem:{species:"GOLEM",base:"🗿",name:"Roku",hp:68,atk:8,def:7,skill:"Stone Guard",evo:[["Iron Roku","🤖",{hp:24,atk:5,def:4}],["Titan Roku","🗿",{hp:45,atk:8,def:6}]]},
+ghost:{species:"GHOST",base:"👻",name:"Muu",hp:40,atk:13,def:1,skill:"Curse",evo:[["Wisp","💠",{hp:13,atk:8,def:2}],["Phantom","👾",{hp:25,atk:12,def:3}]]},
+};
+const EN=[
+["slime","Wild Slime","🟢",30,7,1],["fox","Cinder Fox","🦊",34,8,1],["bat","Cave Bat","🦇",28,10,1],["plant","Mossling","🌱",42,6,3],["golem","Pebble Golem","🗿",55,7,5],["ghost","Lost Wisp","👻",36,11,2]
+];
+const REL=[
+["Lucky Fang","UNCOMMON","CRIT +8%"],["Moon Feather","RARE","DODGE +8%"],["Void Core","EPIC","ATK +5"],["Ancient Bell","LEGENDARY","CAPTURE +15%"],["Tiny Shield","COMMON","DEF +2"],["Greedy Coin","RARE","GOLD x1.5"],["Second Heart","LEGENDARY","SURVIVE ONCE"]
+];
+let S=JSON.parse(localStorage.getItem("MD2")||"null")||{shards:20,owned:["slime"],active:"slime",mons:{slime:{lv:1,xp:0,rare:false,custom:{acc:"",mark:"✦"}}},relics:[],best:0};
+let run=null,B=null,choices=[];
+const save=()=>localStorage.setItem("MD3",JSON.stringify(S));
+function md(id){let b=M[id],x=S.mons[id]||{lv:1,xp:0,rare:false,custom:{}};let hp=b.hp,atk=b.atk,def=b.def,body=b.base,name=b.name;if(x.lv>=9){let e=b.evo[1];name=e[0];body=e[1];hp+=e[2].hp;atk+=e[2].atk;def+=e[2].def}else if(x.lv>=5){let e=b.evo[0];name=e[0];body=e[1];hp+=e[2].hp;atk+=e[2].atk;def+=e[2].def}if(x.rare){body="🌈";name="Shiny "+name}return {...b,...x,hp,atk,def,body,name}};
+function xpNeed(l){return 12+l*8}
+function vis(id,extra=""){let x=md(id);return `<span class="body">${x.body}</span><span class="acc">${x.custom?.acc||""}</span><span class="mark">${x.custom?.mark||extra}</span>`}
+function show(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active")}
+function render(){let x=md(S.active);document.getElementById("shards").textContent=S.shards;document.getElementById("homeVisual").innerHTML=vis(S.active);document.getElementById("homeName").textContent=x.name;document.getElementById("homeSpecies").textContent=`${x.species} • ${x.rare?"✨ SHINY • ":""}Lv.${x.lv}`;
+document.getElementById("homeHpText").textContent=`HP ${x.hp}/${x.hp}`;document.getElementById("homeXP").textContent=`XP ${x.xp}/${xpNeed(x.lv)}`;document.getElementById("homeStats").innerHTML=[["ATK",x.atk],["DEF",x.def],["HP",x.hp],["CRIT",(8+(S.relics.includes("Lucky Fang")?8:0))+"%"]].map(a=>`<div class="stat"><b>${a[1]}</b><small>${a[0]}</small></div>`).join("");
+document.getElementById("preview").innerHTML=S.owned.slice(0,4).map(id=>{let z=md(id);return `<div class="mon"><div class="mini">${z.body}</div><b>${z.name}</b><br><small>Lv.${z.lv} • ${z.species}</small></div>`}).join("");
+document.getElementById("relics").innerHTML=S.relics.length?S.relics.map(r=>`<div class="item" style="padding:7px;border-bottom:1px solid #292c35"><b>✦ ${r}</b></div>`).join(""):"<span class='tag'>No permanent relics yet.</span>";save()}
+function startRun(){let x=md(S.active);run={floor:1,hp:x.hp,maxHp:x.hp,gold:0,runRelics:[],captures:0,usedHeart:false};map()}
+function map(){document.getElementById("floorTitle").textContent=`FLOOR ${run.floor} / 10`;let a=[["battle","⚔","Battle","Normal enemy"],["treasure","✦","Treasure","Relic chance"],["event","?","Mystery","Risk / reward"]];if(run.floor%3===0)a[2]=["recruit","◉","Recruit","Capture chance"];if(run.floor%5===0)a=[["battle","⚔","ELITE","Rare rewards"],["recruit","◉","HUNT","Monster chance"],["rest","♥","CAMP","Recover 40% HP"]];document.getElementById("nodes").innerHTML=a.map(t=>`<button class="node" onclick="node('${t[0]}')"><div class="ico">${t[1]}</div><b>${t[2]}</b><small>${t[3]}</small></button>`).join("");document.getElementById("runStats").innerHTML=[["HP",`${run.hp}/${run.maxHp}`],["GOLD",run.gold],["FLOOR",run.floor],["CAPTURE",run.captures]].map(a=>`<div class="stat"><b>${a[1]}</b><small>${a[0]}</small></div>`).join("");show("map")}
+function node(t){if(t==="battle"){battle(false,false);return}if(t==="recruit"){battle(false,true);return}if(t==="treasure"){treasure();return}if(t==="rest"){run.hp=Math.min(run.maxHp,run.hp+Math.ceil(run.maxHp*.4));next("♥ Camp restored you.");return}event()}
+function enemy(elite=false){let q=EN[Math.floor(Math.random()*EN.length)],mult=(1+(run.floor-1)*.1)*(elite?1.7:1);return{id:q[0],name:q[1],body:q[2],hp:Math.round(q[3]*mult),maxHp:Math.round(q[3]*mult),atk:Math.round(q[4]*mult),def:q[5]+(elite?3:0),elite}}
+function battle(elite=false,recruit=false){B={e:enemy(elite),recruit,boss:false};document.getElementById("battleLog").innerHTML="";if(recruit)log("◉ Weaken it and attempt a capture.");drawBattle();show("battle")}
+function drawBattle(){let e=B.e,x=md(S.active);document.getElementById("battleTitle").textContent=`FLOOR ${run.floor} • ${B.boss?"BOSS":B.recruit?"RECRUIT":e.elite?"ELITE":"BATTLE"}`;document.getElementById("enemyName").textContent=e.name+(e.elite?" ★":"");document.getElementById("enemyVisual").innerHTML=`<span class="body">${e.body}</span>`;document.getElementById("enemyHP").style.width=Math.max(0,e.hp/e.maxHp*100)+"%";document.getElementById("enemyHPText").textContent=`HP ${Math.max(0,e.hp)}/${e.maxHp}`;document.getElementById("intent").textContent=`ATK ${e.atk}`;document.getElementById("playerVisual").innerHTML=vis(S.active);document.getElementById("playerName").textContent=x.name;document.getElementById("playerHP").style.width=Math.max(0,run.hp/run.maxHp*100)+"%";document.getElementById("playerHPText").textContent=`HP ${run.hp}/${run.maxHp}`;document.getElementById("battleXP").textContent=`Lv.${x.lv}`;document.getElementById("captureBtn").disabled=e.hp>e.maxHp*.45}
+function log(s){document.getElementById("battleLog").innerHTML=`<div>${s}</div>`+document.getElementById("battleLog").innerHTML}
+function hurt(n){let x=md(S.active),d=Math.max(1,n-x.def-(S.relics.includes("Tiny Shield")?2:0));if(S.relics.includes("Moon Feather")&&Math.random()<.08){log("🪽 Dodged!");return}run.hp-=d;log(`💥 Took ${d} damage.`);if(run.hp<=0){if(S.relics.includes("Second Heart")&&!run.usedHeart){run.usedHeart=true;run.hp=1;S.relics=S.relics.filter(r=>r!=="Second Heart");log("♥ SECOND HEART saved the run!")}else{setTimeout(dead,250)}}}
+function attack(){let x=md(S.active),crit=Math.random()<.08+(S.relics.includes("Lucky Fang")?.08:0),d=Math.max(1,x.atk+(crit?Math.ceil(x.atk*.7):0)-B.e.def);B.e.hp-=d;log(`${crit?"💥 CRITICAL ":""}Dealt ${d}.`);turn()}
+function skill(){let x=md(S.active),d=Math.max(2,Math.round(x.atk*1.7)-B.e.def);B.e.hp-=d;if(x.species==="PLANT")run.hp=Math.min(run.maxHp,run.hp+Math.ceil(run.maxHp*.15));else if(x.species==="GOLEM")run.hp=Math.min(run.maxHp,run.hp+4);else if(x.species==="GHOST")B.e.hp-=Math.ceil(d*.3);log(`✦ ${x.skill}! ${d} damage.`);turn()}
+function turn(){if(B.e.hp<=0){win();return}setTimeout(()=>{hurt(B.e.atk);drawBattle()},170);drawBattle()}
+function capture(){let e=B.e;if(e.hp>e.maxHp*.45)return;let shiny=Math.random()<.035;let chance=.3+(1-e.hp/e.maxHp)*.45+(S.relics.includes("Ancient Bell")?.15:0);if(Math.random()<chance){if(!S.owned.includes(e.id)){S.owned.push(e.id);S.mons[e.id]={lv:1,xp:0,rare:shiny,custom:{acc:"",mark:"✦"}};log(`✨ CAPTURED ${shiny?"A SHINY ":""}${M[e.id].species}!`)}else{S.shards+=6;log("◉ Duplicate → +6 shards.")}run.captures++;setTimeout(()=>next("◉ Monster captured."),450)}else{log("◉ Capture failed.");hurt(e.atk);drawBattle()}}
+function escapeBattle(){if(Math.random()<.75)next("↩ Escaped.");else{log("Couldn't escape.");hurt(B.e.atk);drawBattle()}}
+function gain(n){let x=S.mons[S.active];x.xp+=n;while(x.xp>=xpNeed(x.lv)){x.xp-=xpNeed(x.lv);x.lv++;if(x.lv===5||x.lv===9)logGlobal(`Evolution unlocked for ${S.active}`)}render()}
+function logGlobal(x){console.log(x)}
+function win(){let r=8+(B.e.elite?12:0)+(B.boss?25:0);run.gold+=r;S.shards+=B.e.elite?4:1;gain(B.boss?30:B.e.elite?15:8);if(B.boss){let item=REL[Math.floor(Math.random()*REL.length)];if(!S.relics.includes(item[0]))S.relics.push(item[0]);alert(`BOSS DEFEATED! ✦ ${item[0]} acquired.`)}setTimeout(()=>next(`🏆 Victory! +${r} gold.`),450)}
+function treasure(){let item=REL[Math.floor(Math.random()*REL.length)];if(!S.relics.includes(item[0])){S.relics.push(item[0]);run.runRelics.push(item[0]);next(`✦ Found ${item[0]}!`)}else{S.shards+=5;next(`✦ Duplicate relic → +5 shards.`)}render()}
+function next(msg){run.floor++;if(run.floor>10){S.shards+=20;S.best=Math.max(S.best,10);render();show("home");alert("DIVE COMPLETE! +20 shards");return}if(run.floor%5===0){boss();return}map()}
+function boss(){let q=enemy(true);run.boss=q;document.getElementById("bossVisual").innerHTML=`<span class="body">${q.body}</span>`;document.getElementById("bossName").textContent=q.name+" OVERLORD";show("boss")}
+function startBoss(){let e={...run.boss};e.hp*=1.55;e.maxHp=e.hp;e.atk*=1.25;e.name+=" OVERLORD";B={e,recruit:false,boss:true};document.getElementById("battleLog").innerHTML="<div>👑 THE BOSS HAS AWAKENED.</div>";drawBattle();show("battle")}
+function event(){let r=Math.floor(Math.random()*3);if(r===0)eventUI("🪞","Mirror Self","The mirror offers a glimpse of an alternate evolution.",[["Touch",()=>{gain(12);next("You learned from your reflection.")}],["Leave",()=>next("You ignored it.")]]);if(r===1)eventUI("🧪","Mutation Juice","Drink it: maximum HP +15, or lose 10 HP.",[["Drink",()=>{if(Math.random()<.65){run.maxHp+=15;run.hp=run.maxHp;next("Your monster mutated positively.")}else{run.hp=Math.max(1,run.hp-10);next("The mutation hurts.")}}],["Leave",()=>next("You left it.")]]);if(r===2)eventUI("🗿","Ancient Shrine","Offer 5 shards for a powerful permanent relic.",[["Offer",()=>{if(S.shards>=5){S.shards-=5;let q=REL[3];if(!S.relics.includes(q[0]))S.relics.push(q[0]);render();next("The shrine gave you an Ancient Bell.")}else alert("Not enough shards.")}],["Leave",()=>next("You walked away.")]])}
+function eventUI(i,t,tx,c){choices=c;document.getElementById("eventIcon").textContent=i;document.getElementById("eventTitle").textContent=t;document.getElementById("eventText").textContent=tx;document.getElementById("eventBtns").innerHTML=c.map((x,k)=>`<button class="btn ${k===0?"primary":""}" onclick="choices[${k}][1]()">${x[0]}</button>`).join("");show("event")}
+function dead(){S.shards+=Math.floor(run.gold/2);render();show("home");alert("RUN FAILED. Your collection and evolution progress remain.")}
+
+function collection(){document.getElementById("sheet").innerHTML=`<button class="close" onclick="closeM()">×</button><h2>BESTIARY ${S.owned.length}/${Object.keys(M).length}</h2><div class="grid2">${Object.keys(M).map(id=>{let owned=S.owned.includes(id),x=owned?md(id):M[id];return `<button class="mon ${owned?"":"locked"}" onclick="${owned?`select('${id}')`:''}"><div class="mini">${owned?x.body:"?"}</div><b>${owned?x.name:"Unknown"}</b><br><small>${owned?`${x.species} • Lv.${x.lv}${x.rare?" • ✨ SHINY":""}`:"Not discovered"}</small></button>`}).join("")}</div><div class="notice" style="margin-top:10px">Each species has individual XP and evolution. Rare shiny individuals have a different appearance.</div>`;openM()}
+function select(id){S.active=id;render();closeM()}
+function customize(){let x=S.mons[S.active];document.getElementById("sheet").innerHTML=`<button class="close" onclick="closeM()">×</button><h2>CUSTOMIZE</h2><div id="cprev" class="monster">${vis(S.active)}</div><div class="section">ACCESSORY</div><div class="choicegrid">${["","🎩","👑","🕶️","🎀","⚡","🧢","💎"].map(a=>`<button class="choice ${x.custom.acc===a?"selected":""}" onclick="setc('acc','${a}')"><span>${a||"◯"}</span><small>${a?"equip":"none"}</small></button>`).join("")}</div><div class="section">MARK</div><div class="choicegrid">${["✦","♡","☄","☀","☾","◆"].map(a=>`<button class="choice ${x.custom.mark===a?"selected":""}" onclick="setc('mark','${a}')"><span>${a}</span><small>mark</small></button>`).join("")}</div><div class="notice" style="margin-top:12px">Evolution changes the body while accessories and marks stay with the individual.</div>`;openM()}
+function setc(k,v){S.mons[S.active].custom[k]=v;render();customize()}
+function relicModal(){document.getElementById("sheet").innerHTML=`<button class="close" onclick="closeM()">×</button><h2>RELICS</h2>${(run?.runRelics?.length?run.runRelics:S.relics).map(r=>{let q=REL.find(a=>a[0]===r);return `<div class="card ${q[1].toLowerCase()}"><b>✦ ${r}</b><div class="tag">${q[1]} • ${q[2]}</div></div>`}).join("")||"<p class='tag'>No relics yet.</p>"}`;openM()}
+function openM(){document.getElementById("modal").classList.add("show")}function closeM(){document.getElementById("modal").classList.remove("show")}
+render();
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
+<script>
+/* MONSTER DIVE IV - clean battle engine */
+(function(){
+  const SAVE_KEY = "MD4";
+  const oldData = (() => {
+    try { return JSON.parse(localStorage.getItem("MD4") || "null"); } catch(e) { return null; }
+  })();
+
+  if (oldData) {
+    window.S = oldData;
+  } else {
+    /* Migrate the old collection once, without carrying over broken battle state. */
+    let migrated = null;
+    try { migrated = JSON.parse(localStorage.getItem("MD3") || localStorage.getItem("MD2") || "null"); } catch(e){}
+    if (migrated) {
+      window.S = migrated;
+      delete window.S.battle;
+      delete window.S.B;
+      window.S.party = window.S.party || [window.S.active || "slime"];
+    }
+  }
+
+  function ensureState(){
+    if(!window.S) window.S = {shards:20,owned:["slime"],active:"slime",mons:{slime:{lv:1,xp:0,rare:false,custom:{acc:"",mark:"✦"}}},relics:[],best:0};
+    S.owned = Array.isArray(S.owned) && S.owned.length ? S.owned : ["slime"];
+    S.active = S.owned.includes(S.active) ? S.active : S.owned[0];
+    S.mons = S.mons || {};
+    S.relics = S.relics || [];
+    S.party = Array.isArray(S.party) ? S.party.filter(id=>S.owned.includes(id)).slice(0,3) : [];
+    if(!S.party.length) S.party=[S.active];
+    S.inventory=S.inventory||{};
+    S.dungeon=S.dungeon||{runs:0,bosses:0,shiny:0,captures:0};
+  }
+  ensureState();
+
+  function persist(){
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch(e){}
+  }
+
+  /* Keep the existing rendering helpers, but make all battle entry points explicit. */
+  let battleState = null;
+  let actionBusy = false;
+
+  function fighter(){
+    if(!battleState) return null;
+    const id=S.party[battleState.activeIndex];
+    const x=partyStatsSafe(id);
+    return {id,x,hp:battleState.partyHP[battleState.activeIndex]};
+  }
+
+  function partyStatsSafe(id){
+    const x = md(id);
+    const inv = (S.inventory && S.inventory[id]) || {};
+    const element = ({slime:"WATER",fox:"FIRE",bat:"WIND",plant:"EARTH",golem:"EARTH",ghost:"DARK"})[id] || "NEUTRAL";
+    return {...x, element, atk:x.atk+(inv.atk||0), def:x.def+(inv.def||0), hp:x.hp+(inv.hp||0)};
+  }
+
+  const elements = {
+    slime:["WATER","💧"], fox:["FIRE","🔥"], bat:["WIND","🌪️"],
+    plant:["EARTH","🌿"], golem:["EARTH","🌿"], ghost:["DARK","🌑"]
+  };
+  const skills = {
+    slime:[["Bubble Burst",1.25],["Split",1.55]],
+    fox:[["Flame Fang",1.25],["Inferno",1.65]],
+    bat:[["Sonic Wave",1.20],["Night Dive",1.70]],
+    plant:[["Vine Whip",1.25],["Bloom Heal",0]],
+    golem:[["Rock Crash",1.30],["Fortify",0]],
+    ghost:[["Hex",1.30],["Soul Drain",1.60]]
+  };
+
+  function elementOf(id){ return elements[id]?.[0] || "NEUTRAL"; }
+  function multiplier(a,b){
+    if(a==="WATER" && b==="FIRE") return 1.35;
+    if(a==="FIRE" && b==="EARTH") return 1.35;
+    if(a==="EARTH" && b==="WATER") return 1.35;
+    if(a==="WIND" && b==="EARTH") return 1.15;
+    if(a==="DARK" && b==="WIND") return 1.30;
+    return 1;
+  }
+
+  function writeLog(msg){
+    const el=document.getElementById("battleLog");
+    if(el) el.innerHTML="<div>"+msg+"</div>"+el.innerHTML;
+  }
+
+  function refreshBattle(){
+    if(!battleState) return;
+    const f=fighter(), e=battleState.enemy;
+    if(!f || !e) return;
+    document.getElementById("battleTitle").textContent =
+      `FLOOR ${run?.floor||1} • ${battleState.boss?"BOSS":battleState.recruit?"RECRUIT":e.elite?"ELITE":"BATTLE"}`;
+    document.getElementById("enemyName").textContent=`${e.name} • ${e.element}`;
+    document.getElementById("enemyVisual").innerHTML=`<span class="body">${e.body}</span><span class="mark">${elements[e.id]?.[1]||"✦"}</span>`;
+    document.getElementById("enemyHP").style.width=Math.max(0,e.hp/e.maxHp*100)+"%";
+    document.getElementById("enemyHPText").textContent=`HP ${Math.max(0,Math.ceil(e.hp))}/${Math.ceil(e.maxHp)}`;
+    document.getElementById("intent").textContent=`${e.element} • ATK ${e.atk}`;
+    document.getElementById("playerVisual").innerHTML=vis(f.id);
+    document.getElementById("playerName").textContent=`${f.x.name} • ${f.x.element}`;
+    document.getElementById("playerHP").style.width=Math.max(0,f.hp/f.x.hp*100)+"%";
+    document.getElementById("playerHPText").textContent=`HP ${Math.max(0,Math.ceil(f.hp))}/${Math.ceil(f.x.hp)}`;
+    document.getElementById("battleXP").textContent=`Lv.${f.x.lv}`;
+    const cap=document.getElementById("captureBtn");
+    if(cap) cap.disabled=e.hp>e.maxHp*.45 || battleState.boss;
+
+    let sw=document.getElementById("switchParty");
+    if(!sw){
+      sw=document.createElement("button");
+      sw.id="switchParty"; sw.className="btn";
+      sw.style.cssText="width:100%;margin-top:8px";
+      sw.textContent="🔄 SWITCH MONSTER";
+      sw.addEventListener("click", ()=>window.switchMonster());
+      const log=document.getElementById("battleLog");
+      log.parentNode.insertBefore(sw,log);
+    }
+    sw.disabled=S.party.length<2 || battleState.partyHP.filter(h=>h>0).length<2 || actionBusy;
+  }
+
+  function beginBattle(elite=false,recruit=false,boss=false,bossData=null){
+    ensureState();
+    const q=boss ? {...bossData} : enemy(elite);
+    q.element=elementOf(q.id);
+    battleState={
+      enemy:q, elite, recruit, boss,
+      activeIndex:0,
+      partyHP:S.party.map(id=>partyStatsSafe(id).hp),
+      turn:1
+    };
+    actionBusy=false;
+    const log=document.getElementById("battleLog");
+    if(log) log.innerHTML="";
+    if(recruit) writeLog("◉ HPを減らして捕獲を狙おう。");
+    if(boss) writeLog("👑 THE BOSS HAS AWAKENED.");
+    refreshBattle();
+    show("battle");
+  }
+
+  function enemyForRun(elite=false){
+    const q=EN[Math.floor(Math.random()*EN.length)];
+    const mult=(1+((run?.floor||1)-1)*.1)*(elite?1.7:1);
+    return {
+      id:q[0],name:q[1],body:q[2],
+      hp:Math.round(q[3]*mult),maxHp:Math.round(q[3]*mult),
+      atk:Math.round(q[4]*mult),def:q[5]+(elite?3:0),elite,
+      element:elementOf(q[0])
+    };
+  }
+  window.enemy = enemyForRun;
+
+  function enemyTurn(){
+    if(!battleState) return;
+    const f=fighter();
+    if(!f) return;
+    const dmg=Math.max(1,Math.round(battleState.enemy.atk-f.x.def));
+    battleState.partyHP[battleState.activeIndex]-=dmg;
+    writeLog(`💥 ${f.x.name} took ${dmg}.`);
+
+    if(battleState.partyHP[battleState.activeIndex]<=0){
+      battleState.partyHP[battleState.activeIndex]=0;
+      const next=battleState.partyHP.findIndex(h=>h>0);
+      if(next<0){
+        battleState=null;
+        dead();
+        return;
+      }
+      battleState.activeIndex=next;
+      writeLog(`🔄 ${md(S.party[next]).name} enters!`);
+    }
+    actionBusy=false;
+    refreshBattle();
+  }
+
+  function winBattle(){
+    if(!battleState) return;
+    const reward=10+(battleState.elite?15:0)+(battleState.boss?30:0);
+    run.gold+=reward;
+    S.shards+=(battleState.elite?4:1);
+    try { gain(battleState.boss?35:battleState.elite?16:9); } catch(e){}
+    if(battleState.boss){
+      S.dungeon.bosses=(S.dungeon.bosses||0)+1;
+      const q=REL[Math.floor(Math.random()*REL.length)];
+      if(!S.relics.includes(q[0])) S.relics.push(q[0]);
+    }
+    persist();
+    writeLog(`🏆 VICTORY +${reward} gold`);
+    actionBusy=true;
+    const msg=battleState.boss?`👑 Boss defeated. ${battleState.enemy.name}`:`🏆 ${reward} gold acquired.`;
+    setTimeout(()=>{ battleState=null; actionBusy=false; next(msg); },500);
+  }
+
+  window.attack=function(){
+    if(!battleState || actionBusy) return;
+    actionBusy=true;
+    const f=fighter(),e=battleState.enemy;
+    const eff=multiplier(f.x.element,e.element);
+    const crit=Math.random()<(.08+(S.relics.includes("Lucky Fang")?.08:0));
+    const dmg=Math.max(1,Math.round((f.x.atk+(crit?Math.ceil(f.x.atk*.7):0)-e.def)*eff));
+    e.hp-=dmg;
+    writeLog(`${crit?"💥 CRITICAL! ":""}ATTACK → ${dmg} damage.${eff>1.1?" SUPER EFFECTIVE!":""}`);
+    refreshBattle();
+    if(e.hp<=0){ winBattle(); return; }
+    setTimeout(enemyTurn,300);
+  };
+
+  window.skill=function(){
+    if(!battleState || actionBusy) return;
+    const f=fighter(), list=skills[f.id]||[["Tackle",1.1]];
+    /* Alternate between the two skills so the single SKILL button remains simple. */
+    const index=((battleState.turn||1)-1)%list.length;
+    const s=list[index];
+    actionBusy=true;
+
+    if(s[0]==="Bloom Heal"){
+      const heal=Math.ceil(f.x.hp*.28);
+      battleState.partyHP[battleState.activeIndex]=Math.min(f.x.hp,battleState.partyHP[battleState.activeIndex]+heal);
+      writeLog(`🌸 ${s[0]} restored ${heal} HP.`);
+      battleState.turn++;
+      refreshBattle();
+      setTimeout(enemyTurn,300);
+      return;
+    }
+    if(s[0]==="Fortify"){
+      const heal=Math.ceil(f.x.hp*.12);
+      battleState.partyHP[battleState.activeIndex]=Math.min(f.x.hp,battleState.partyHP[battleState.activeIndex]+heal);
+      writeLog(`🗿 ${s[0]} restored ${heal} HP.`);
+      battleState.turn++;
+      refreshBattle();
+      setTimeout(enemyTurn,300);
+      return;
+    }
+
+    const eff=multiplier(f.x.element,battleState.enemy.element);
+    const dmg=Math.max(2,Math.round((f.x.atk*s[1]-battleState.enemy.def)*eff));
+    battleState.enemy.hp-=dmg;
+    writeLog(`✦ ${s[0]} → ${dmg} damage.`);
+    battleState.turn++;
+    refreshBattle();
+    if(battleState.enemy.hp<=0){ winBattle(); return; }
+    setTimeout(enemyTurn,300);
+  };
+
+  window.capture=function(){
+    if(!battleState || actionBusy) return;
+    const e=battleState.enemy;
+    if(battleState.boss || e.hp>e.maxHp*.45) return;
+    actionBusy=true;
+    const shiny=Math.random()<.035;
+    const chance=.32+(1-e.hp/e.maxHp)*.43+(S.relics.includes("Ancient Bell")?.15:0);
+    if(Math.random()<chance){
+      if(!S.owned.includes(e.id)){
+        S.owned.push(e.id);
+        S.mons[e.id]={lv:1,xp:0,rare:shiny,custom:{acc:"",mark:"✦"}};
+        if(shiny)S.dungeon.shiny=(S.dungeon.shiny||0)+1;
+      }else S.shards+=6;
+      S.dungeon.captures=(S.dungeon.captures||0)+1;
+      run.captures++;
+      persist(); render();
+      setTimeout(()=>{battleState=null;actionBusy=false;next(`◉ ${shiny?"✨ SHINY ":""}${M[e.id].species} captured!`);},450);
+    }else{
+      writeLog("◉ Capture failed.");
+      setTimeout(enemyTurn,300);
+    }
+  };
+
+  window.escapeBattle=function(){
+    if(!battleState || actionBusy) return;
+    actionBusy=true;
+    if(Math.random()<.72){
+      setTimeout(()=>{battleState=null;actionBusy=false;next("↩ Escaped.");},100);
+    }else{
+      writeLog("Couldn't escape.");
+      setTimeout(enemyTurn,300);
+    }
+  };
+
+  window.switchMonster=function(){
+    if(!battleState || actionBusy) return;
+    const alive=battleState.partyHP.filter(h=>h>0);
+    if(alive.length<2) return;
+    let i=battleState.activeIndex;
+    for(let n=0;n<S.party.length;n++){
+      i=(i+1)%S.party.length;
+      if(battleState.partyHP[i]>0) break;
+    }
+    if(i===battleState.activeIndex) return;
+    battleState.activeIndex=i;
+    writeLog(`🔄 Switched to ${md(S.party[i]).name}`);
+    refreshBattle();
+  };
+
+  window.battle=function(elite=false,recruit=false){ beginBattle(elite,recruit,false,null); };
+  window.startBoss=function(){
+    if(!run || !run.boss){ return; }
+    const q={...run.boss};
+    q.hp=Math.round(q.hp*1.55); q.maxHp=q.hp; q.atk=Math.round(q.atk*1.25);
+    q.name=q.name+" OVERLORD";
+    beginBattle(false,false,true,q);
+  };
+
+  /* Clean run start; the battle engine no longer wraps the old battle functions. */
+  window.startRun=function(){
+    ensureState();
+    const x=md(S.active);
+    run={floor:1,hp:x.hp,maxHp:x.hp,gold:0,runRelics:[],captures:0,usedHeart:false};
+    S.dungeon.runs=(S.dungeon.runs||0)+1;
+    persist();
+    map();
+  };
+
+  /* Clean map node handler. */
+  window.v4Node=function(t){
+    if(t==="battle") return beginBattle(false,false,false,null);
+    if(t==="elite") return beginBattle(true,false,false,null);
+    if(t==="recruit") return beginBattle(false,true,false,null);
+    if(t==="treasure") return treasure();
+    if(t==="rest"){run.hp=run.maxHp;map();return;}
+    return event();
+  };
+
+  /* Replace node buttons after every map render. */
+  const oldMapFn=window.map;
+  window.map=function(){
+    if(!run) return;
+    document.getElementById("floorTitle").textContent=`FLOOR ${run.floor} / 10`;
+    const types=[
+      ["battle","⚔","BATTLE","Normal enemy"],
+      ["elite","☠","ELITE","High reward"],
+      ["treasure","✦","TREASURE","Relic / gear"],
+      ["recruit","◉","HUNT","Capture chance"],
+      ["event","?","MYSTERY","Random event"],
+      ["rest","♥","CAMP","Recover party"]
+    ];
+    let picks=[];
+    while(picks.length<3){
+      const q=types[Math.floor(Math.random()*types.length)];
+      if(!picks.includes(q))picks.push(q);
+    }
+    if(run.floor%5===0)picks=[types[1],types[3],types[4]];
+    document.getElementById("nodes").innerHTML=picks.map(t=>
+      `<button class="node" onclick="v4Node('${t[0]}')"><div class="ico">${t[1]}</div><b>${t[2]}</b><small>${t[3]}</small></button>`
+    ).join("");
+    document.getElementById("runStats").innerHTML=[
+      ["HP",`${run.hp}/${run.maxHp}`],["GOLD",run.gold],["FLOOR",run.floor],["CAPTURE",run.captures]
+    ].map(a=>`<div class="stat"><b>${a[1]}</b><small>${a[0]}</small></div>`).join("");
+    show("map");
+  };
+
+  /* Remove the old inline node function from relevance by routing it here. */
+  window.node=function(t){ window.v4Node(t); };
+
+  /* Prevent the old global B from being used by new buttons. */
+  Object.defineProperty(window,"B",{configurable:true,get(){return battleState;},set(v){/* ignore legacy writes */}});
+
+  /* Cache-busting SW registration. */
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js?v=4").catch(()=>{});
+  }
+
+  /* Fresh UI status. */
+  setTimeout(()=>{
+    const logo=document.querySelector(".logo");
+    if(logo) logo.textContent="MONSTER DIVE IV";
+    document.title="MONSTER DIVE IV";
+  },0);
+
+  window.MONSTER_DIVE_DEBUG=()=>({
+    battle:!!battleState,
+    party:S.party,
+    active:S.active,
+    floor:run?.floor,
+    enemy:battleState?.enemy?.name
+  });
+})();
+</script>
+</body></html>
